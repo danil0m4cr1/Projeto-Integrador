@@ -25,7 +25,7 @@
                     <i class="fa-solid fa-star text-[#ffe100] text-[20px]"></i>
                     <p class="text-[20px]">4.3</p>
                     <button id="hint" ref="hint" @click="showHint">
-                        <i class="fa-solid fa-circle-info absolute top-[-5px] right-[-14px] text-[14px] cursor-pointer"></i>
+                        <i class="fa-solid fa-circle-info absolute top-[-5px] right-[-8px] text-[14px] cursor-pointer"></i>
                     </button>
                 </div>
                 <p id="pHint" ref="pHint" class="hidden pt-2 text-[15px]">Média de avaliações dos usuários</p>
