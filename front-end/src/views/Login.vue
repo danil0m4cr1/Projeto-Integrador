@@ -8,7 +8,7 @@
       />
     </div>
 
-    <div class="w-full lg:w-1/2 bg-white flex flex-col justify-center items-center p-8 lg:p-10">
+    <div class="h-[100vh] w-full lg:w-1/2 bg-white flex flex-col justify-center items-center p-8 lg:p-10">
       <h1 class="text-3xl font-bold mb-6 text-black">Login</h1>
       
       <form class="w-full max-w-xs">
