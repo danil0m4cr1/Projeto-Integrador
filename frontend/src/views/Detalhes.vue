@@ -12,10 +12,10 @@
                 <p class="text-[21px]">{{ selectedProduct.name }}<br> 
                     {{ selectedProduct.size }}
                 </p>
-                <p class="text-[24px] py-5"><b>{{ selectedProduct.price }}</b></p>
+                <p class="text-[24px] py-5"><b>R$ {{ selectedProduct.price }}</b></p>
                 <div class="py-5">
                     <router-link :to="userStore.isLoggedIn ? '/carrinho' : '/login'">
-                        <button class="cursor-pointer">
+                        <button class="cursor-pointer" @click="list(selectedProduct)"> <!--criar função para add produtos a lista-->
                             <i class="fa-solid fa-cart-shopping"></i>
                             Adicionar ao carrinho
                         </button>
@@ -44,6 +44,10 @@ const productStore = useProductStore();
 const userStore = useUserStore();
 
 const selectedProduct = productStore.selectedProduct;
+
+function list(product) {
+    productStore.addToCart(product);
+}
 
 const hint = ref(null);
 const pHint = ref(null);
