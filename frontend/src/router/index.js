@@ -4,12 +4,14 @@ import Detalhes from "../views/Detalhes.vue";
 import Login from "../views/Login.vue";
 import Avaliacao from "../views/Avaliacao.vue";
 import Carrinho from "../views/Carrinho.vue";
+import Estoque from "../views/Estoque.vue";
 
 const routes = [
     {path: "/", component: Produtos, name: "produtos"},
     {path: "/detalhes", component: Detalhes, name: "detalhes", props: route => ({ product: route.params.product })},
     {path: "/login", component: Login, name: "login"},
     {path: "/carrinho", component: Carrinho, name: "carrinho"},
-    {path: "/avaliar", component: Avaliacao, name: "avaliar"}
+    {path: "/avaliar", component: Avaliacao, name: "avaliar"},
+    {path: "/estoque", component: Estoque, name: "estoque"}
 ]
 export default createRouter({history: createWebHistory(), routes});
