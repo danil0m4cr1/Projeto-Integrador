@@ -14,12 +14,13 @@
                 </p>
                 <p class="text-[24px] py-5"><b>R$ {{ selectedProduct.price }}</b></p>
                 <div class="py-5">
-                    <router-link :to="userStore.isLoggedIn ? '/carrinho' : '/login'">
-                        <button class="cursor-pointer" @click="list(selectedProduct)"> <!--criar função para add produtos a lista-->
-                            <i class="fa-solid fa-cart-shopping"></i>
-                            Adicionar ao carrinho
-                        </button>
-                    </router-link>
+                    <button 
+                        class="cursor-pointer bg-[#EFB11E] px-6 py-2 rounded-full hover:bg-[#E8A81D] font-semibold" 
+                        @click="addProductToCart"
+                    >
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        Adicionar ao carrinho
+                    </button>
                 </div>
                 <div class="flex justify-center items-center gap-2 relative">
                     <i class="fa-solid fa-star text-[#ffe100] text-[20px]"></i>
@@ -38,16 +39,14 @@
 <script setup>
 import { useProductStore } from '../stores/productStore';
 import { useUserStore } from '../stores/userStore';
+import { useRouter } from 'vue-router';
 import { ref } from 'vue';
 
 const productStore = useProductStore();
 const userStore = useUserStore();
+const router = useRouter();
 
 const selectedProduct = productStore.selectedProduct;
-
-function list(product) {
-    productStore.addToCart(product);
-}
 
 const hint = ref(null);
 const pHint = ref(null);
@@ -55,6 +54,30 @@ const pHint = ref(null);
 const showHint = () => {
     if(pHint.value)
         pHint.value.classList.toggle('hidden');
+}
+
+async function conectarOPC() {
+  try {
+    const res = await fetch("http://localhost:3000/opc/connect-opc");
+    const data = await res.json();
+    console.log("📡 Resposta do backend:", data.message);
+  } catch (err) {
+    console.error("❌ Erro ao chamar backend:", err);
+  }
+}
+
+function addProductToCart() {
+  if (!userStore.isLoggedIn) {
+    router.push('/login');
+    return;
+  }
+  
+  productStore.addToCart(selectedProduct);
+  conectarOPC();
+  
+  // Feedback visual
+  alert(`${selectedProduct.name} adicionado ao carrinho!`);
+  router.push('/carrinho');
 }
 
 </script>

@@ -1,73 +1,78 @@
 <template>
   <section class="h-[calc(100vh-92px)] w-full flex justify-center items-start pb-20 max-[1300px]:h-full max-[1300px]:mt-10">
-    <div class="flex flex-col w-[90%] max-w-[600px] gap-6">
+    <div class="flex flex-col w-[90%] items-center gap-6">
+      <div class="absolute left-20 top-35 max-[1120px]:static flex justify-center items-center">
+        <button
+        class="bg-[#EFB11E] px-4 py-2 rounded-full hover:bg-[#E8A81D] font-semibold flex items-center justify-center gap-2 cursor-pointer"
+        >
+        <i class="fa-solid fa-right-from-bracket rotate-180"></i>
+       <router-link to="/" class="mt-0.5">CONTINUE COMPRANDO</router-link>
+        </button>
+      </div>
       
-      <!-- Suco de Laranja -->
-      <div class="flex flex-col items-center text-center px-10 pb-10 border-2 rounded-3xl border-[#EFB11E] max-sm:m-4">
-        <img :src="sucoLaranja.image" :alt="sucoLaranja.name" class="w-[200px]" />
-        <p class="text-[21px] mt-4">{{ sucoLaranja.name }}<br>{{ sucoLaranja.size }}</p>
-        <p class="text-[24px] py-5"><b>R$ {{ sucoLaranja.price.toFixed(2) }}</b></p>
+      <div class="text-center mt-10">
+        <h2 class="text-[37px] font-bold text-[#EFB11E]">Meu Carrinho</h2>
+      </div>
 
-        <div class="flex justify-center items-center gap-4 relative">
-          <label class="text-[28px]">Quantidade:</label>
-          <div class="flex items-center">
-            <button @click="decrementQuantity('laranja')" class="text-black font-bold rounded-r-full flex items-center justify-center relative left-[16px] cursor-pointer">-</button>
-            <input type="number" :value="sucoLaranja.quantity" class="text-center w-[80px] border-1 rounded-3xl border-[#EFB11E] px-3" readonly />
-            <button @click="incrementQuantity('laranja')" class="text-black font-bold rounded-r-full flex items-center justify-center relative right-[16px] cursor-pointer">+</button>
+      <!-- Produtos do Carrinho -->
+      <div class="flex w-[100%] gap-15 max-[1120px]:flex-col justify-center items-center">
+        <div 
+          v-for="(product, index) in cartProducts" 
+          :key="index"
+          class="flex flex-col items-center w-[80%] text-center px-10 pb-10 border-2 rounded-3xl border-[#EFB11E] max-sm:w-[90%]"
+        >
+          <img :src="product.image" :alt="product.name" class="w-[200px]" />
+          <p class="text-[21px] mt-4">{{ product.name }}<br>{{ product.size }}</p>
+          <p class="text-[24px] py-5"><b>R$ {{ parsePrice(product.price) }}</b></p>
+
+          <div class="flex justify-center items-center gap-3">
+            <label class="text-[20px]">Quantidade:</label>
+            <div class="flex items-center">
+              <button 
+                @click="decrementQuantity(index)" 
+                class="w-[35px] h-[35px] flex items-center justify-center text-[20px] font-bold border-2 border-[#EFB11E] rounded-l-full hover:bg-[#EFB11E] hover:text-white transition-all cursor-pointer"
+              >
+                -
+              </button>
+              <div class="w-[50px] h-[35px] flex items-center justify-center border-t-2 border-b-2 border-[#EFB11E] bg-white">
+                <span class="text-[18px] font-semibold">{{ product.quantity }}</span>
+              </div>
+              <button 
+                @click="incrementQuantity(index)" 
+                class="w-[35px] h-[35px] flex items-center justify-center text-[20px] font-bold border-2 border-[#EFB11E] rounded-r-full hover:bg-[#EFB11E] hover:text-white transition-all cursor-pointer"
+              >
+                +
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div class="flex justify-center items-center gap-2 mt-6 text-[22px] font-semibold">
-          Total: <span class="text-[#EFB11E]">R$ {{ (sucoLaranja.price * sucoLaranja.quantity).toFixed(2) }}</span>
+          <div class="flex justify-center items-center gap-2 mt-6 text-[22px] font-semibold">
+            Total: <span class="text-[#EFB11E]">R$ {{ (parseFloat(product.price.toString().replace(',', '.')) * product.quantity).toFixed(2).replace('.', ',') }}</span>
+          </div>
         </div>
       </div>
 
-      <!-- Suco de Morango -->
-      <div class="flex flex-col items-center text-center px-10 pb-10 border-2 rounded-3xl border-[#EFB11E] max-sm:m-4">
-        <img :src="sucoMorango.image" :alt="sucoMorango.name" class="w-[200px]" />
-        <p class="text-[21px] mt-4">{{ sucoMorango.name }}<br>{{ sucoMorango.size }}</p>
-        <p class="text-[24px] py-5"><b>R$ {{ sucoMorango.price.toFixed(2) }}</b></p>
-
-        <div class="flex justify-center items-center gap-4 relative">
-          <label class="text-[28px]">Quantidade:</label>
-          <div class="flex items-center">
-            <button @click="decrementQuantity('morango')" class="text-black font-bold rounded-r-full flex items-center justify-center relative left-[16px] cursor-pointer">-</button>
-            <input type="number" :value="sucoMorango.quantity" class="text-center w-[80px] border-1 rounded-3xl border-[#EFB11E] px-3" readonly />
-            <button @click="incrementQuantity('morango')" class="text-black font-bold rounded-r-full flex items-center justify-center relative right-[16px] cursor-pointer">+</button>
-          </div>
-        </div>
-
-        <div class="flex justify-center items-center gap-2 mt-6 text-[22px] font-semibold">
-          Total: <span class="text-[#EFB11E]">R$ {{ (sucoMorango.price * sucoMorango.quantity).toFixed(2) }}</span>
-        </div>
-      </div>
-
-      <!-- Suco de Maracujá -->
-      <div class="flex flex-col items-center text-center px-10 pb-10 border-2 rounded-3xl border-[#EFB11E] max-sm:m-4">
-        <img :src="sucoMaracuja.image" :alt="sucoMaracuja.name" class="w-[200px]" />
-        <p class="text-[21px] mt-4">{{ sucoMaracuja.name }}<br>{{ sucoMaracuja.size }}</p>
-        <p class="text-[24px] py-5"><b>R$ {{ sucoMaracuja.price.toFixed(2) }}</b></p>
-
-        <div class="flex justify-center items-center gap-4 relative">
-          <label class="text-[28px]">Quantidade:</label>
-          <div class="flex items-center">
-            <button @click="decrementQuantity('maracuja')" class="text-black font-bold rounded-r-full flex items-center justify-center relative left-[16px] cursor-pointer">-</button>
-            <input type="number" :value="sucoMaracuja.quantity" class="text-center w-[80px] border-1 rounded-3xl border-[#EFB11E] px-3" readonly />
-            <button @click="incrementQuantity('maracuja')" class="text-black font-bold rounded-r-full flex items-center justify-center relative right-[16px] cursor-pointer">+</button>
-          </div>
-        </div>
-
-        <div class="flex justify-center items-center gap-2 mt-6 text-[22px] font-semibold">
-          Total: <span class="text-[#EFB11E]">R$ {{ (sucoMaracuja.price * sucoMaracuja.quantity).toFixed(2) }}</span>
-        </div>
+      <!-- Mensagem quando carrinho vazio -->
+      <div v-if="cartProducts.length === 0" class="flex flex-col items-center text-center py-20">
+        <i class="fa-solid fa-cart-shopping text-[64px] text-gray-300 mb-4"></i>
+        <p class="text-[24px] text-gray-500 mb-2">Seu carrinho está vazio</p>
+        <router-link to="/" class="mt-4 text-[#EFB11E] hover:underline text-[18px]">
+          <i class="fa-solid fa-arrow-left mr-2"></i>
+          Voltar para produtos
+        </router-link>
       </div>
 
       <!-- Total Geral -->
-      <div class="flex justify-center items-center gap-2 mt-4 text-[24px] font-bold">
-        Total Geral: <span class="text-[#EFB11E]">R$ {{ totalGeral.toFixed(2) }}</span>
+      <div v-if="cartProducts.length > 0" class="flex justify-center items-center gap-2 mt-4 text-[24px] font-bold">
+        Total Geral: <span class="text-[#EFB11E]">R$ {{ totalGeral }}</span>
       </div>
 
-      <button type="submit" class="w-[300px] mt-6 py-2 bg-[#EFB11E] mx-auto my-0 text-black font-bold rounded-full hover:bg-[#E8A81D]">
+      <button 
+        v-if="cartProducts.length > 0"
+        type="submit" 
+        class="w-[300px] mt-6 py-2 bg-[#EFB11E] mx-auto my-0 text-black font-bold rounded-full hover:bg-[#E8A81D] cursor-pointer max-sm:w-[90%]"
+        @click="finalizarCompra"
+      >
         FINALIZAR COMPRA
       </button>
     </div>
@@ -75,33 +80,51 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue';
+import { computed } from 'vue';
+import { useProductStore } from '../stores/productStore';
+import { useRouter } from 'vue-router';
 
-const sucoLaranja = reactive({ name: 'Suco de Laranja', size: '500ml', price: 11.50, quantity: 0, image: '/laranja.png' });
-const sucoMorango = reactive({ name: 'Suco de Morango', size: '500ml', price: 13.75, quantity: 0, image: '/morango.png' });
-const sucoMaracuja = reactive({ name: 'Suco de Maracujá', size: '500ml', price: 15.49, quantity: 0, image: '/maracuja.png' });
+const productStore = useProductStore();
+const router = useRouter();
+
+const cartProducts = computed(() => productStore.cart || []);
 
 const totalGeral = computed(() => {
-  return sucoLaranja.price * sucoLaranja.quantity +
-         sucoMorango.price * sucoMorango.quantity +
-         sucoMaracuja.price * sucoMaracuja.quantity;
+  const total = cartProducts.value.reduce((sum, product) => {
+    const price = parseFloat(product.price.toString().replace(',', '.'));
+    return sum + (price * product.quantity);
+  }, 0);
+  return total.toFixed(2).replace('.', ',');
 });
 
-const incrementQuantity = (tipo) => {
-  const total = sucoLaranja.quantity + sucoMorango.quantity + sucoMaracuja.quantity;
+function parsePrice(price) {
+  const numPrice = parseFloat(price.toString().replace(',', '.'));
+  return numPrice.toFixed(2).replace('.', ',');
+}
+
+const incrementQuantity = (index) => {
+  const total = cartProducts.value.reduce((sum, product) => sum + product.quantity, 0);
   if (total >= 3) {
     alert('Você só pode adicionar até 3 produtos no total!');
     return;
   }
-  if (tipo === 'laranja') sucoLaranja.quantity++;
-  if (tipo === 'morango') sucoMorango.quantity++;
-  if (tipo === 'maracuja') sucoMaracuja.quantity++;
+  productStore.cart[index].quantity++;
 };
 
-const decrementQuantity = (tipo) => {
-  if (tipo === 'laranja' && sucoLaranja.quantity > 0) sucoLaranja.quantity--;
-  if (tipo === 'morango' && sucoMorango.quantity > 0) sucoMorango.quantity--;
-  if (tipo === 'maracuja' && sucoMaracuja.quantity > 0) sucoMaracuja.quantity--;
+const decrementQuantity = (index) => {
+  if (productStore.cart[index].quantity > 1) {
+    productStore.cart[index].quantity--;
+  } else {
+    if (confirm('Deseja remover este item do carrinho?')) {
+      productStore.cart.splice(index, 1);
+    }
+  }
+};
+
+const finalizarCompra = () => {
+  alert('Compra finalizada com sucesso!');
+  productStore.clearCart();
+  router.push('/');
 };
 </script>
 

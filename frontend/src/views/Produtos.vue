@@ -32,13 +32,13 @@
                     <p class="text-[24px] py-5"><b>R$ 13,75</b></p>
                 </div>
                 <div class="text-center px-16 border-2 rounded-3xl border-[#EFB11E] cursor-pointer transform transition duration-400 hover:scale-115 shadow-[5px_5px_10px_rgba(0,0,0,0.51)] max-sm:m-4"
-                @click="sendDetails({ name: 'Suco de Maracujá', size: '500ml', price: '15.49', image: '/maracuja.png' })">
+                @click="sendDetails({ name: 'Suco de Limão', size: '500ml', price: '15.49', image: '/limao.png' })">
                     <img 
-                    src="/maracuja.png" 
-                    alt="Suco de Maracujá"
+                    src="/limao.png" 
+                    alt="Suco de Limão"
                     class="w-[200px]"
                     >
-                    <p class="text-[21px]">Suco de Maracujá<br> 
+                    <p class="text-[21px]">Suco de Limão<br> 
                         500ml
                     </p>
                     <p class="text-[24px] py-5"><b>R$ 15,49</b></p>

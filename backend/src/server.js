@@ -4,6 +4,7 @@ import morgan from "morgan";
 import { config } from "dotenv";
 import { connectDB } from "./config/db.js";
 import usersRouter from "./routes/users.routes.js";
+import opcuaRouter from "./routes/opcua.routes.js";
 
 config();
 const app = express();
@@ -15,6 +16,7 @@ app.use(morgan("dev"));      // logs de requests no console
 await connectDB();
 
 app.use("/api/users", usersRouter);
+app.use("/opc", opcuaRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
