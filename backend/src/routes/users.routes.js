@@ -3,7 +3,6 @@ import User from "../models/User.js";
 
 const router = Router();
 
-// Verifica usuário
 router.post("/check-user", async (req, res) => {
   const { email, pass } = req.body;
 
@@ -15,14 +14,18 @@ router.post("/check-user", async (req, res) => {
     }
 
     if (pass === user.pass) {
-      return res.json({ exists: true, name: user.name });
+      return res.json({ 
+        exists: true, 
+        email: user.email,
+        role: user.role
+      }); 
     } else {
       return res.json({ exists: false });
     }
 
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Erro ao verificar usuário");
+    console.error("Erro ao verificar usuário:", error);
+    res.status(500).json({ error: "Erro ao verificar usuário" });
   }
 });
 

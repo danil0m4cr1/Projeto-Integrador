@@ -9,16 +9,16 @@ export async function connectOPC() {
   });
 
   try {
-    console.log("🔌 Conectando ao servidor OPC UA...");
+    console.log("Conectando ao servidor OPC UA...");
     await client.connect(endpointUrl);
-    console.log("✅ Conectado com sucesso ao servidor:", endpointUrl);
+    console.log("Conectado com sucesso ao servidor:", endpointUrl);
 
     const session = await client.createSession();
-    console.log("🔐 Sessão OPC UA criada!");
+    console.log("Sessão OPC UA criada!");
 
     // Retorna a sessão para que outras partes do código possam usá-la
     return { client, session };
   } catch (err) {
-    console.error("❌ Erro na conexão OPC UA:", err);
+    console.error("Erro na conexão OPC UA:", err);
   }
 }
