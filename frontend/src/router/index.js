@@ -6,6 +6,7 @@ import Avaliacao from "../views/Avaliacao.vue";
 import Carrinho from "../views/Carrinho.vue";
 import Estoque from "../views/Estoque.vue";
 import PainelAdmin from "../views/PainelAdmin.vue";
+import Pedidos from "../views/Pedidos.vue";
 
 const routes = [
     {path: "/", component: Produtos, name: "produtos"},
@@ -14,6 +15,7 @@ const routes = [
     {path: "/carrinho", component: Carrinho, name: "carrinho"},
     {path: "/avaliar", component: Avaliacao, name: "avaliar"},
     {path: "/estoque", component: Estoque, name: "estoque"},
-    {path: "/admin", component: PainelAdmin, name: "admin"}
+    {path: "/admin", component: PainelAdmin, name: "admin"},
+    {path: "/pedidos", component: Pedidos, name: "pedidos"}
 ];
 export default createRouter({history: createWebHistory(), routes});
