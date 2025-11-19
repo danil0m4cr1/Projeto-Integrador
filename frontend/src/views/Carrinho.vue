@@ -71,21 +71,25 @@
         v-if="cartProducts.length > 0"
         type="submit" 
         class="w-[300px] mt-6 py-2 bg-[#EFB11E] mx-auto my-0 text-black font-bold rounded-full hover:bg-[#E8A81D] cursor-pointer max-sm:w-[90%]"
+        :disabled="isProcessing"
         @click="finalizarCompra"
       >
-        FINALIZAR COMPRA
+        {{ isProcessing ? 'PROCESSANDO...' : 'FINALIZAR COMPRA' }}
       </button>
     </div>
   </section>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useProductStore } from '../stores/productStore';
+import { useUserStore } from '../stores/userStore';
 import { useRouter } from 'vue-router';
 
 const productStore = useProductStore();
+const userStore = useUserStore();
 const router = useRouter();
+const isProcessing = ref(false);
 
 const cartProducts = computed(() => productStore.cart || []);
 
@@ -121,15 +125,62 @@ const decrementQuantity = (index) => {
   }
 };
 
-const finalizarCompra = () => {
-  alert('Compra finalizada com sucesso!');
-  productStore.clearCart();
-  router.push('/');
+const finalizarCompra = async () => {
+  // Verifica se o usuário está logado
+  if (!userStore.isLoggedIn || !userStore.user?.email) {
+    alert('Você precisa estar logado para finalizar a compra!');
+    router.push('/login');
+    return;
+  }
+
+  isProcessing.value = true;
+
+  try {
+    const orderData = {
+      userEmail: userStore.user.email,
+      products: cartProducts.value.map(product => ({
+        name: product.name,
+        size: product.size,
+        price: product.price,
+        quantity: product.quantity,
+        image: product.image
+      })),
+      totalAmount: totalGeral.value
+    };
+
+    const response = await fetch('http://localhost:3000/api/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(orderData)
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao criar pedido');
+    }
+
+    const result = await response.json();
+    
+    alert('Compra finalizada com sucesso! Seu pedido foi registrado.');
+    productStore.clearCart();
+    router.push('/');
+  } catch (error) {
+    console.error('Erro ao finalizar compra:', error);
+    alert('Erro ao finalizar compra. Tente novamente.');
+  } finally {
+    isProcessing.value = false;
+  }
 };
 </script>
 
 <style scoped>
 button {
   transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

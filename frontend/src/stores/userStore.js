@@ -9,6 +9,11 @@ export const useUserStore = defineStore('user', {
     setUser(userInfo) {
       this.user = userInfo;
       this.isLoggedIn = true;
+    },
+    logout() {
+      this.user = null;
+      this.isLoggedIn = false;
     }
-  }
+  },
+  persist: true // Ativa a persistência automática com o plugin
 });

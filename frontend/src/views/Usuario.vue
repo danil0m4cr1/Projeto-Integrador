@@ -15,7 +15,10 @@
       />
     </div>
 
-    <!-- ======== Versão Desktop (tabela original mais larga) ======== -->
+    <!-- Loading -->
+    <div v-if="loading" class="text-black">Carregando usuários...</div>
+
+    <!-- ======== Versão Desktop ======== -->
     <div class="hidden md:block w-full max-w-3xl">
       <table class="w-full text-left border-collapse shadow-md rounded-lg overflow-hidden">
         <thead>
@@ -23,31 +26,65 @@
             <th class="px-6 py-3">Usuário</th>
             <th class="px-6 py-3">Email</th>
             <th class="px-6 py-3">Cargo</th>
+            <th class="px-6 py-3" v-if="editMode">Ações</th>
           </tr>
         </thead>
         <tbody>
           <tr
             v-for="user in filteredUsers"
-            :key="user.email"
-            class="bg-[#F8F4E8] hover:bg-[#f0e9d9] transition-colors"
+            :key="user._id"
+            class="bg-[#F8F4E8] border-b border-[#e0d7b8]"
           >
-            <td class="px-6 py-3 font-semibold">{{ user.name }}</td>
-            <td class="px-6 py-3">{{ user.email }}</td>
-            <td class="px-6 py-3">{{ user.role }}</td>
+            <td class="px-6 py-3">
+              <input
+                v-if="editMode"
+                v-model="user.name"
+                class="w-full px-2 py-1 border border-gray-300 rounded"
+              />
+              <span v-else class="font-semibold">{{ user.name }}</span>
+            </td>
+            <td class="px-6 py-3">
+              <input
+                v-if="editMode"
+                v-model="user.email"
+                type="email"
+                class="w-full px-2 py-1 border border-gray-300 rounded"
+              />
+              <span v-else>{{ user.email }}</span>
+            </td>
+            <td class="px-6 py-3">
+              <select
+                v-if="editMode"
+                v-model="user.role"
+                class="w-full px-2 py-1 border border-gray-300 rounded"
+              >
+                <option value="admin">Admin</option>
+                <option value="user">Usuário</option>
+              </select>
+              <span v-else>{{ user.role }}</span>
+            </td>
+            <td class="px-6 py-3" v-if="editMode">
+              <button
+                @click="deleteUser(user._id)"
+                class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
+              >
+                Excluir
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- ======== Versão Mobile (duas colunas com scroll visível) ======== -->
+    <!-- ======== Versão Mobile ======== -->
     <div
-      class="block md:hidden w-full max-w-5xl overflow-x-auto scrollbar-thin scrollbar-thumb-[#EFB11E] scrollbar-track-[#f8f4e8]"
+      class="block md:hidden w-full max-w-5xl overflow-x-auto"
     >
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-full px-2">
         <div
           v-for="user in filteredUsers"
-          :key="user.email"
-          class="bg-[#F8F4E8] border border-[#e0d7b8] rounded-lg overflow-hidden hover:bg-[#f0e9d9] transition-colors"
+          :key="user._id"
+          class="bg-[#F8F4E8] border border-[#e0d7b8] rounded-lg overflow-hidden"
         >
           <table class="w-full text-left border-collapse min-w-[400px]">
             <thead>
@@ -59,22 +96,78 @@
             </thead>
             <tbody>
               <tr>
-                <td class="px-4 py-2 font-semibold">{{ user.name }}</td>
-                <td class="px-4 py-2">{{ user.email }}</td>
-                <td class="px-4 py-2">{{ user.role }}</td>
+                <td class="px-4 py-2">
+                  <input
+                    v-if="editMode"
+                    v-model="user.name"
+                    class="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                  />
+                  <span v-else class="font-semibold">{{ user.name }}</span>
+                </td>
+                <td class="px-4 py-2">
+                  <input
+                    v-if="editMode"
+                    v-model="user.email"
+                    type="email"
+                    class="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                  />
+                  <span v-else>{{ user.email }}</span>
+                </td>
+                <td class="px-4 py-2">
+                  <select
+                    v-if="editMode"
+                    v-model="user.role"
+                    class="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                  >
+                    <option value="Admin">Admin</option>
+                    <option value="Usuário">Usuário</option>
+                  </select>
+                  <span v-else>{{ user.role }}</span>
+                </td>
               </tr>
             </tbody>
           </table>
+          <div v-if="editMode" class="p-2 bg-[#EFB11E] flex justify-end">
+            <button
+              @click="deleteUser(user._id)"
+              class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors text-sm cursor-pointer"
+            >
+              Excluir
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Botão editar usuários -->
-    <button
-      class="mt-6 px-6 py-2 bg-[#EFB11E] text-black font-bold rounded-full hover:bg-[#d99f1b] transition-colors"
-    >
-      EDITAR USUÁRIOS
-    </button>
+    <!-- Botões -->
+    <div class="mt-6 flex gap-4">
+      <button
+        v-if="!editMode"
+        @click="editMode = true"
+        class="px-6 py-2 bg-[#EFB11E] text-black font-bold rounded-full hover:bg-[#d99f1b] cursor-pointer"
+      >
+        EDITAR USUÁRIOS
+      </button>
+      <template v-else>
+        <button
+          @click="saveChanges"
+          class="px-6 py-2 bg-green-500 text-white font-bold rounded-full hover:bg-green-600 cursor-pointer"
+        >
+          SALVAR
+        </button>
+        <button
+          @click="cancelEdit"
+          class="px-6 py-2 bg-gray-500 text-white font-bold rounded-full hover:bg-gray-600 cursor-pointer"
+        >
+          CANCELAR
+        </button>
+      </template>
+    </div>
+
+    <!-- Mensagens -->
+    <div v-if="message" class="mt-4 px-4 py-2 rounded" :class="messageType === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+      {{ message }}
+    </div>
   </section>
 </template>
 
@@ -83,11 +176,12 @@ export default {
   data() {
     return {
       searchQuery: '',
-      users: [
-        { name: 'Igor Matheus', email: 'igor@gmail.com', role: 'Admin' },
-        { name: 'Danilo Nunes', email: 'danilo@gmail.com', role: 'Usuário' },
-        { name: 'Gabriel Lucas', email: 'gabriel@gmail.com', role: 'Usuário' },
-      ],
+      users: [],
+      originalUsers: [],
+      loading: false,
+      editMode: false,
+      message: '',
+      messageType: ''
     };
   },
   computed: {
@@ -101,6 +195,80 @@ export default {
       );
     },
   },
+  methods: {
+    async fetchUsers() {
+      this.loading = true;
+      try {
+        const response = await fetch('http://localhost:3000/api/users');
+        if (!response.ok) throw new Error('Erro ao buscar usuários');
+        this.users = await response.json();
+        this.originalUsers = JSON.parse(JSON.stringify(this.users));
+      } catch (error) {
+        console.error('Erro:', error);
+        this.showMessage('Erro ao carregar usuários', 'error');
+      } finally {
+        this.loading = false;
+      }
+    },
+    async saveChanges() {
+      this.loading = true;
+      try {
+        const promises = this.users.map(user => 
+          fetch(`http://localhost:3000/api/users/${user._id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: user.name,
+              email: user.email,
+              role: user.role
+            })
+          })
+        );
+        
+        await Promise.all(promises);
+        this.editMode = false;
+        this.originalUsers = JSON.parse(JSON.stringify(this.users));
+        this.showMessage('Usuários atualizados com sucesso!', 'success');
+      } catch (error) {
+        console.error('Erro ao salvar:', error);
+        this.showMessage('Erro ao salvar alterações', 'error');
+      } finally {
+        this.loading = false;
+      }
+    },
+    cancelEdit() {
+      this.users = JSON.parse(JSON.stringify(this.originalUsers));
+      this.editMode = false;
+    },
+    async deleteUser(userId) {
+      if (!confirm('Tem certeza que deseja excluir este usuário?')) return;
+      
+      try {
+        const response = await fetch(`http://localhost:3000/api/users/${userId}`, {
+          method: 'DELETE'
+        });
+        
+        if (!response.ok) throw new Error('Erro ao deletar usuário');
+        
+        this.users = this.users.filter(u => u._id !== userId);
+        this.originalUsers = this.originalUsers.filter(u => u._id !== userId);
+        this.showMessage('Usuário excluído com sucesso!', 'success');
+      } catch (error) {
+        console.error('Erro:', error);
+        this.showMessage('Erro ao excluir usuário', 'error');
+      }
+    },
+    showMessage(text, type) {
+      this.message = text;
+      this.messageType = type;
+      setTimeout(() => {
+        this.message = '';
+      }, 3000);
+    }
+  },
+  mounted() {
+    this.fetchUsers();
+  }
 };
 </script>
 
@@ -110,7 +278,6 @@ table td {
   border: 1px solid #e0d7b8;
 }
 
-/* ===== Scrollbar customizada apenas para mobile ===== */
 @media (max-width: 768px) {
   .scrollbar-thin::-webkit-scrollbar {
     height: 8px;

@@ -13,32 +13,63 @@
             
             <div v-if="user.user?.role === 'admin'">
                 <div class="flex gap-10 max-sm:flex-col max-sm:gap-0">
-                    <router-link to="/admin" class="text-[20px] max-sm:py-5 hover:transition duration-200 hover:text-[#6d5620]">
+                    <router-link to="/admin/usuarios" class="text-[20px] max-sm:py-5 hover:transition duration-200 hover:text-[#6d5620]">
                         Usuários
                     </router-link>
-                    <router-link to="/admin" class="text-[20px] max-sm:py-5 hover:transition duration-200 hover:text-[#6d5620]">
+                    <router-link to="/admin/pedidos" class="text-[20px] max-sm:py-5 hover:transition duration-200 hover:text-[#6d5620]">
                         Pedidos
                     </router-link>
+                    <router-link to="/admin" class="text-[20px] max-sm:py-5 hover:transition duration-200 hover:text-[#6d5620]">
+                        Dashboard
+                    </router-link>
+                    <button 
+                        @click="sair" 
+                        class="text-[20px] max-sm:py-5 hover:transition duration-200 hover:text-[#6d5620] cursor-pointer"
+                    >
+                        Sair
+                    </button>
                 </div>
             </div>
             
             <div v-if="user.user?.role === 'user'">
-                <router-link to="/" class="text-[20px] max-sm:py-5 hover:transition duration-200 hover:text-[#6d5620]">
-                    Meu Carrinho
-                </router-link>
+                <div class="flex gap-10 max-sm:flex-col max-sm:gap-0">
+                    <router-link to="/" class="text-[20px] max-sm:py-5 hover:transition duration-200 hover:text-[#6d5620]">
+                        Produtos
+                    </router-link>
+                    <router-link to="/carrinho" class="text-[20px] max-sm:py-5 hover:transition duration-200 hover:text-[#6d5620]">
+                        Meu Carrinho
+                    </router-link>
+                    <router-link to="/pedidos" class="text-[20px] max-sm:py-5 hover:transition duration-200 hover:text-[#6d5620]">
+                        Meus Pedidos
+                    </router-link>
+                    <button 
+                        @click="sair" 
+                        class="text-[20px] max-sm:py-5 hover:transition duration-200 hover:text-[#6d5620] cursor-pointer"
+                    >
+                        Sair
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import {useUserStore} from "../stores/userStore";
+import { useUserStore } from "../stores/userStore";
+import { useRouter } from 'vue-router';
 
 export default {
     name: "Header",
-    setup(){
+    setup() {
         const user = useUserStore();
-        return {user};
+        const router = useRouter();
+        
+        const sair = () => {
+            user.logout();
+            router.push('/login');
+        };
+        
+        return { user, sair };
     }
 }
 </script>
