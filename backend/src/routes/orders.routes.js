@@ -36,6 +36,7 @@ router.post("/", async (req, res) => {
 -----------------------------------------------------------*/
 router.post("/:id/finalizar", async (req, res) => {
   const { id } = req.params;
+  const { op, produto, quant } = req.body;
   console.log(`[LOG] Iniciando finalização do pedido ${id}`);
 
   try {
@@ -71,8 +72,8 @@ router.post("/:id/finalizar", async (req, res) => {
 
       // Enviar pedido
       console.log(`[LOG] Enviando pedido OPC UA para pedido ${id}`);
-      await opcuaService.enviarPedido(parseInt(id, 10), 1, totalQuantity);
-      console.log(`[LOG] Pedido OPC UA enviado com sucesso`);
+      
+      await opcuaService.enviarPedido(op, produto, quant);
 
       // Iniciar produção
       console.log(`[LOG] Iniciando produção OPC UA para pedido ${id}`);

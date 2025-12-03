@@ -56,15 +56,6 @@ const showHint = () => {
         pHint.value.classList.toggle('hidden');
 }
 
-async function conectarOPC() {
-  try {
-    const res = await fetch("http://localhost:3000/opc/connect-opc");
-    const data = await res.json();
-    console.log("📡 Resposta do backend:", data.message);
-  } catch (err) {
-    console.error("❌ Erro ao chamar backend:", err);
-  }
-}
 
 function addProductToCart() {
   if (!userStore.isLoggedIn) {
@@ -73,7 +64,7 @@ function addProductToCart() {
   }
   
   productStore.addToCart(selectedProduct);
-  conectarOPC();
+
   
   // Feedback visual
   alert(`${selectedProduct.name} adicionado ao carrinho!`);

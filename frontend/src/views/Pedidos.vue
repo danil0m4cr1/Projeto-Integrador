@@ -245,6 +245,17 @@ const editMode = ref(false);
 const message = ref('');
 const messageType = ref('');
 
+function timer() {
+  setTimeout(() => {
+    pedidos.value = pedidos.value.map(pedido => ({
+      ...pedido,
+      status: 'concluído'
+    }));
+  }, 5000);
+}
+
+timer()
+
 const filteredPedidos = computed(() => {
   if (!searchQuery.value) return pedidos.value;
   

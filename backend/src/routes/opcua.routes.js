@@ -46,25 +46,34 @@ router.get("/status", (req, res) => {
 /* Criar pedido e enviar para o PLC */
 router.post("/pedido", async (req, res) => {
   const { op, produto, quantidade } = req.body;
-  console.log(`[LOG] Recebido pedido: OP=${op}, Produto=${produto}, Quantidade=${quantidade}`);
 
+  // Verificação dos campos obrigatórios
+  console.log(`[LOG] Recebido pedido: OP=${op}, Produto=${produto}, Quantidade=${quantidade}`);
+  
   if (!op || !produto || !quantidade) {
     console.log("[ERRO] Campos obrigatórios faltando");
     return res.status(400).json({ error: "Campos op, produto e quantidade são obrigatórios" });
   }
 
   try {
+    // Passando os parâmetros para o fluxo corretamente
+    console.log("[LOG] Iniciando criação de pedido no fluxo...");
     await fluxo.novoPedido(op, produto, quantidade);
+
+    // Executando o passo inicial do fluxo
     console.log("[LOG] Pedido registrado no fluxo. Executando step inicial...");
     await fluxo.step();
     console.log("[LOG] Step inicial concluído");
 
+    // Enviar resposta de sucesso
     res.json({ success: true, message: "Pedido enviado ao OPC UA e registrado no fluxo" });
   } catch (err) {
+    // Tratar erro e detalhar a falha
     console.error("[ERRO] Falha ao criar pedido:", err);
-    res.status(500).json({ success: false, message: "❌ Erro ao enviar pedido" });
+    res.status(500).json({ success: false, message: `❌ Erro ao enviar pedido: ${err.message}` });
   }
 });
+
 
 /* Iniciar produção */
 router.post("/iniciar", async (req, res) => {

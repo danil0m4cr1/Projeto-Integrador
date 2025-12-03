@@ -18,13 +18,11 @@ class FluxoProducao {
     await this.opcua.disconnect();
   }
 
-  /* Função para ler TAGs OPC UA (simulando método ler do PLC) */
-  async ler(nodeId) {
-    // Aqui você deve implementar a leitura real
-    // Se não tiver, podemos simular com um valor booleano aleatório
-    // ou usar o OPCUAClient diretamente
+  /* Função para ler TAGs OPC UA usando o método readNode do opcuaService */
+  async readNode(nodeId) {
+    // Aqui chamamos o readNode do opcuaService para fazer a leitura
     console.log(`🔍 Lendo TAG: ${nodeId}`);
-    return true; // simulando sempre ACK positivo
+    return await this.opcua.readNode(nodeId); // Usando o readNode do opcuaService
   }
 
   /* Função para enviar o pedido ao PLC */
@@ -57,22 +55,22 @@ class FluxoProducao {
     switch (this.state) {
       case 1:
         console.log("📥 Aplicando pedido...");
-        const pedidoACK = await this.ler(nodes.ack.pedidoACK);
-        const aplicaACK = await this.ler(nodes.ack.aplicaACK);
+        const pedidoACK = await this.readNode(nodes.ack.pedidoACK);
+        const aplicaACK = await this.readNode(nodes.ack.aplicaACK);
         if (pedidoACK && aplicaACK) this.setState(2);
         break;
 
       case 2:
         console.log("✅ Pedido aplicado, pronto para iniciar");
-        const inicioACK = await this.ler(nodes.ack.inicioACK);
+        const inicioACK = await this.readNode(nodes.ack.inicioACK);
         if (inicioACK) this.setState(10);
         break;
 
       case 10:
         console.log("⚙️ Produzindo...");
-        const execACK = await this.ler(nodes.ack.execACK);
-        const fimACK = await this.ler(nodes.ack.fimACK);
-        const falhaACK = await this.ler(nodes.ack.falhaACK);
+        const execACK = await this.readNode(nodes.ack.execACK);
+        const fimACK = await this.readNode(nodes.ack.fimACK);
+        const falhaACK = await this.readNode(nodes.ack.falhaACK);
 
         if (falhaACK) {
           console.log("❌ Falha detectada durante execução");
@@ -92,7 +90,7 @@ class FluxoProducao {
 
       case 20:
         console.log("📦 Aguardando reabastecimento...");
-        const estoque = await this.ler(nodes.status.estoqueProd);
+        const estoque = await this.readNode(nodes.status.estoqueProd);
         if (estoque[this.pedido.produto] >= this.pedido.quant) {
           console.log("📦 Estoque suficiente, retomando execução");
           this.setState(21);
@@ -109,7 +107,7 @@ class FluxoProducao {
         break;
 
       default:
-        const geral = await this.ler(nodes.status.geral);
+        const geral = await this.readNode(nodes.status.geral);
         console.log("📡 Estado atual:", this.state, " | CLP status.geral:", geral);
     }
   }
@@ -126,4 +124,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
-export default FluxoProducao;
+export default {
+  connect,
+  disconnect,
+  readNode,  // O método readNode está sendo exportado corretamente
+};

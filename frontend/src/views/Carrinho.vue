@@ -148,7 +148,10 @@ const finalizarCompra = async () => {
       totalAmount: totalGeral.value
     };
 
-    const response = await fetch('http://localhost:3000/api/orders', {
+    console.log('📦 Enviando pedido para o backend:', orderData);
+
+    // ENDPOINT ATUALIZADO - Envia para o CLP via FluxoProducao
+    const response = await fetch('http://localhost:3000/api/orders/create-and-send', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -157,17 +160,26 @@ const finalizarCompra = async () => {
     });
 
     if (!response.ok) {
-      throw new Error('Erro ao criar pedido');
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Erro ao criar pedido');
     }
 
     const result = await response.json();
     
-    alert('Compra finalizada com sucesso! Seu pedido foi registrado.');
+    console.log('✅ Resposta do servidor:', result);
+    
+    // Mensagem de sucesso detalhada
+    alert(`Compra finalizada com sucesso!
+    
+🎉 Pedido #${result.data.orderId} registrado
+📦 Enviado para produção no CLP
+⚙️ Status: ${result.data.status}`);
+    
     productStore.clearCart();
     router.push('/');
   } catch (error) {
-    console.error('Erro ao finalizar compra:', error);
-    alert('Erro ao finalizar compra. Tente novamente.');
+    console.error('❌ Erro ao finalizar compra:', error);
+    alert(`Erro ao finalizar compra: ${error.message}\n\nTente novamente.`);
   } finally {
     isProcessing.value = false;
   }
