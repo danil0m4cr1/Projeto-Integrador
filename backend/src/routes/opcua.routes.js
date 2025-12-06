@@ -3,11 +3,9 @@ import FluxoProducao from "../services/fluxoProducao.js";
 
 const router = Router();
 
-// Instância global do fluxo
 const fluxo = new FluxoProducao();
 let maquinaRodando = false;
 
-/* Conectar OPC UA */
 router.post("/connect", async (req, res) => {
   console.log("[LOG] Tentando conectar ao OPC UA...");
   try {
@@ -20,7 +18,6 @@ router.post("/connect", async (req, res) => {
   }
 });
 
-/* Desconectar OPC UA */
 router.post("/disconnect", async (req, res) => {
   console.log("[LOG] Tentando desconectar OPC UA...");
   try {
@@ -33,7 +30,6 @@ router.post("/disconnect", async (req, res) => {
   }
 });
 
-/* Status da conexão OPC UA */
 router.get("/status", (req, res) => {
   const connected = fluxo.opcua.isConnected();
   console.log("[LOG] Status da conexão:", connected);
@@ -43,11 +39,10 @@ router.get("/status", (req, res) => {
   });
 });
 
-/* Criar pedido e enviar para o PLC */
 router.post("/pedido", async (req, res) => {
   const { op, produto, quantidade } = req.body;
 
-  // Verificação dos campos obrigatórios
+
   console.log(`[LOG] Recebido pedido: OP=${op}, Produto=${produto}, Quantidade=${quantidade}`);
   
   if (!op || !produto || !quantidade) {
@@ -56,26 +51,22 @@ router.post("/pedido", async (req, res) => {
   }
 
   try {
-    // Passando os parâmetros para o fluxo corretamente
     console.log("[LOG] Iniciando criação de pedido no fluxo...");
     await fluxo.novoPedido(op, produto, quantidade);
 
-    // Executando o passo inicial do fluxo
     console.log("[LOG] Pedido registrado no fluxo. Executando step inicial...");
     await fluxo.step();
     console.log("[LOG] Step inicial concluído");
 
-    // Enviar resposta de sucesso
     res.json({ success: true, message: "Pedido enviado ao OPC UA e registrado no fluxo" });
   } catch (err) {
-    // Tratar erro e detalhar a falha
+
     console.error("[ERRO] Falha ao criar pedido:", err);
     res.status(500).json({ success: false, message: `❌ Erro ao enviar pedido: ${err.message}` });
   }
 });
 
 
-/* Iniciar produção */
 router.post("/iniciar", async (req, res) => {
   console.log("[LOG] Solicitada inicialização da produção");
   try {
@@ -91,7 +82,6 @@ router.post("/iniciar", async (req, res) => {
   }
 });
 
-/* Cancelar produção */
 router.post("/cancelar", (req, res) => {
   console.log("[LOG] Solicitação de cancelamento de produção");
   try {
@@ -109,7 +99,6 @@ router.post("/cancelar", (req, res) => {
   }
 });
 
-/* Resetar PLC */
 router.post("/reset", async (req, res) => {
   console.log("[LOG] Solicitado reset do PLC");
   try {
@@ -123,7 +112,6 @@ router.post("/reset", async (req, res) => {
   }
 });
 
-/* Iniciar Máquina de Estados (loop contínuo) */
 router.post("/maquina/start", (req, res) => {
   if (maquinaRodando) {
     console.log("[LOG] Máquina de estados já está rodando");
@@ -148,7 +136,6 @@ router.post("/maquina/start", (req, res) => {
   res.json({ success: true, message: "Máquina de estados iniciada" });
 });
 
-/* Parar Máquina de Estados */
 router.post("/maquina/stop", (req, res) => {
   console.log("[LOG] Parando máquina de estados...");
   maquinaRodando = false;

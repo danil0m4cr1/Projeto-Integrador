@@ -2,19 +2,15 @@
     <div class="p-6 bg-gray-50 min-h-[calc(100vh-143px)]">
         <h1 class="text-3xl font-bold text-gray-800 mb-8">Dashboard Administrativo</h1>
  
-        <!-- Carregamento -->
         <div v-if="loading" class="text-center py-10">
             <p class="text-xl text-gray-600">Carregando dados...</p>
         </div>
 
-        <!-- Erro -->
         <div v-else-if="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {{ error }}
         </div>
 
-        <!-- Dashboard -->
         <div v-else>
-            <!-- Cards de resumo -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-400">
                     <div class="flex items-center justify-between">
@@ -76,9 +72,7 @@
                 </div>
             </div>
 
-            <!-- Gráficos -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- Gráfico de Barras - Status dos Pedidos -->
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">Status dos Pedidos</h2>
                     <div class="flex justify-center items-center h-[300px]">
@@ -86,7 +80,6 @@
                     </div>
                 </div>
 
-                <!-- Gráfico de Pizza - Distribuição -->
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">Distribuição de Status</h2>
                     <div class="flex justify-center items-center h-[300px]">
@@ -95,7 +88,6 @@
                 </div>
             </div>
 
-            <!-- Receita Total -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-8">
                 <div class="flex items-center justify-between">
                     <div>
@@ -111,7 +103,6 @@
                 <p class="text-xs text-gray-500 mt-2">Baseado em {{ statusCount.concluído }} pedidos concluídos</p>
             </div>
 
-            <!-- Últimos Pedidos -->
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Últimos Pedidos</h2>
                 <div class="overflow-x-auto">

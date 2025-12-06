@@ -4,9 +4,6 @@ import opcuaService from "../services/opcuaService.js";
 
 const router = Router();
 
-/* ---------------------------------------------------------
-   Criar novo pedido
------------------------------------------------------------*/
 router.post("/", async (req, res) => {
   const { userEmail, products, totalAmount } = req.body;
 
@@ -31,9 +28,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-/* ---------------------------------------------------------
-   Finalizar compra → inicia produção OPC UA
------------------------------------------------------------*/
 router.post("/:id/finalizar", async (req, res) => {
   const { id } = req.params;
   const { op, produto, quant } = req.body;
@@ -51,12 +45,10 @@ router.post("/:id/finalizar", async (req, res) => {
       return res.status(400).json({ error: "Pedido já finalizado ou em produção" });
     }
 
-    // Atualiza status para "fabricando"
     order.status = "fabricando";
     await order.save();
     console.log(`[LOG] Pedido ${id} atualizado para status "fabricando"`);
 
-    // --- Integração OPC UA ---
     try {
       console.log(`[LOG] Verificando conexão OPC UA`);
       if (!opcuaService.isConnected()) {
@@ -70,12 +62,10 @@ router.post("/:id/finalizar", async (req, res) => {
       const totalQuantity = order.products.reduce((sum, p) => sum + p.quantity, 0);
       console.log(`[LOG] Total de produtos a enviar: ${totalQuantity}`);
 
-      // Enviar pedido
       console.log(`[LOG] Enviando pedido OPC UA para pedido ${id}`);
       
       await opcuaService.enviarPedido(op, produto, quant);
 
-      // Iniciar produção
       console.log(`[LOG] Iniciando produção OPC UA para pedido ${id}`);
       await opcuaService.iniciarProducao();
       console.log(`[LOG] Produção iniciada com sucesso`);
@@ -97,10 +87,6 @@ router.post("/:id/finalizar", async (req, res) => {
   }
 });
 
-
-/* ---------------------------------------------------------
-   Listar pedidos, buscar por email ou ID
------------------------------------------------------------*/
 router.get("/", async (req, res) => {
   try {
     const orders = await Order.find().sort({ createdAt: -1 });
@@ -134,9 +120,6 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-/* ---------------------------------------------------------
-   Atualizar status do pedido (opcional)
------------------------------------------------------------*/
 router.put("/:id/status", async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
@@ -149,7 +132,6 @@ router.put("/:id/status", async (req, res) => {
     order.status = status;
     await order.save();
 
-    // Integração OPC UA
     try {
       if (!opcuaService.isConnected()) {
         await opcuaService.connect();
@@ -170,7 +152,7 @@ router.put("/:id/status", async (req, res) => {
         await opcuaService.cancelarProducao();
       }
     } catch (opcuaError) {
-      console.error("⚠️ Erro na integração OPC UA:", opcuaError.message);
+      console.error("Erro na integração OPC UA:", opcuaError.message);
     }
 
     res.json({
@@ -184,9 +166,6 @@ router.put("/:id/status", async (req, res) => {
   }
 });
 
-/* ---------------------------------------------------------
-   Deletar pedido
------------------------------------------------------------*/
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
 

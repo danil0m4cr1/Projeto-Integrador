@@ -66,7 +66,6 @@ function addProductToCart() {
   productStore.addToCart(selectedProduct);
 
   
-  // Feedback visual
   alert(`${selectedProduct.name} adicionado ao carrinho!`);
   router.push('/carrinho');
 }

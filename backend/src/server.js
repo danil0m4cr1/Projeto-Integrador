@@ -15,32 +15,23 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Instância do FluxoProducao (máquina de estados)
 const fluxo = new FluxoProducao();
 
-// Conectar MongoDB
 mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/smart", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log("✅ Conectado ao MongoDB"))
-.catch(err => console.error("❌ Erro ao conectar ao MongoDB:", err));
+.then(() => console.log("Conectado ao MongoDB"))
+.catch(err => console.error("Erro ao conectar ao MongoDB:", err));
 
-// Rotas existentes
 app.use("/api/users", usersRoutes);
 app.use("/api/orders", ordersRoutes);
 app.use("/api/opcua", opcuaRoutes);
 
-/* =========================================================
-   NOVAS ROTAS - INTEGRAÇÃO COM CLP VIA FLUXO DE PRODUÇÃO
-========================================================= */
-
-// Endpoint para criar pedido e enviar ao CLP via FluxoProducao
 app.post('/api/orders/create-and-send', async (req, res) => {
   try {
     const { userEmail, products, totalAmount } = req.body;
 
-    // Validação básica
     if (!userEmail || !products || products.length === 0) {
       return res.status(400).json({ 
         success: false, 
@@ -48,17 +39,16 @@ app.post('/api/orders/create-and-send', async (req, res) => {
       });
     }
 
-    console.log('\n📦 ═══════════════════════════════════════');
+    console.log('\n═══════════════════════════════════════');
     console.log('   NOVO PEDIDO RECEBIDO');
     console.log('═══════════════════════════════════════');
-    console.log('   👤 Email:', userEmail);
-    console.log('   📦 Produtos:', products.length);
-    console.log('   💰 Total: R$', totalAmount);
+    console.log('   Email:', userEmail);
+    console.log('   Produtos:', products.length);
+    console.log('   Total: R$', totalAmount);
     console.log('═══════════════════════════════════════\n');
 
-    // Verifica conexão com o CLP
     if (!fluxo.opcua.isConnected()) {
-      console.log('⚠️ CLP desconectado. Tentando reconectar...');
+      console.log('CLP desconectado. Tentando reconectar...');
       await fluxo.connect();
       
       if (!fluxo.opcua.isConnected()) {
@@ -69,29 +59,24 @@ app.post('/api/orders/create-and-send', async (req, res) => {
       }
     }
 
-    // Gera número da OP (Order Production)
-    const opNumber = Date.now() % 1000000; // Últimos 6 dígitos do timestamp
+    const opNumber = Date.now() % 1000000;
     
-    // Mapeia o primeiro produto para código do CLP
     const productCode = mapProductToCode(products[0].name);
     
-    // Calcula quantidade total
     const totalQuantity = products.reduce((sum, p) => sum + p.quantity, 0);
 
-    console.log('🔧 Dados para o CLP:');
+    console.log('Dados para o CLP:');
     console.log('   - OP:', opNumber);
     console.log('   - Produto:', products[0].name);
     console.log('   - Código Produto:', productCode);
     console.log('   - Quantidade:', totalQuantity);
     console.log('');
 
-    // Envia pedido para o CLP através do FluxoProducao
     try {
       await fluxo.novoPedido(opNumber, productCode, totalQuantity);
-      console.log('✅ Pedido enviado ao CLP com sucesso!');
-      console.log('🔄 Máquina de estados iniciada para processar pedido\n');
+      console.log('Pedido enviado ao CLP com sucesso!');
+      console.log('Máquina de estados iniciada para processar pedido\n');
     } catch (pedidoError) {
-      // Se falhar por estoque do produto insuficiente
       if (pedidoError.message.includes('Estoque do produto insuficiente')) {
         const match = pedidoError.message.match(/Disponível: (\d+), Necessário: (\d+)/);
         const disponivel = match ? parseInt(match[1]) : 0;
@@ -111,7 +96,6 @@ app.post('/api/orders/create-and-send', async (req, res) => {
         });
       }
       
-      // Se falhar por quantidade máxima excedida
       if (pedidoError.message.includes('Quantidade máxima')) {
         return res.status(400).json({
           success: false,
@@ -125,7 +109,6 @@ app.post('/api/orders/create-and-send', async (req, res) => {
         });
       }
       
-      // Outros erros relacionados ao CLP
       if (pedidoError.message.includes('CLP')) {
         return res.status(503).json({
           success: false,
@@ -134,13 +117,9 @@ app.post('/api/orders/create-and-send', async (req, res) => {
         });
       }
       
-      throw pedidoError; // Re-lança outros erros
+      throw pedidoError;
     }
 
-    // Aqui você pode salvar no MongoDB através da rota existente
-    // ou criar um novo documento diretamente
-
-    // Resposta de sucesso
     return res.status(201).json({
       success: true,
       message: 'Pedido criado e enviado para produção no CLP',
@@ -158,7 +137,7 @@ app.post('/api/orders/create-and-send', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('\n❌ ═══════════════════════════════════════');
+    console.error('\n═══════════════════════════════════════');
     console.error('   ERRO AO PROCESSAR PEDIDO');
     console.error('═══════════════════════════════════════');
     console.error(error);
@@ -172,7 +151,6 @@ app.post('/api/orders/create-and-send', async (req, res) => {
   }
 });
 
-// Iniciar produção manualmente
 app.post('/api/production/start', async (req, res) => {
   try {
     if (!fluxo.opcua.isConnected()) {
@@ -193,7 +171,6 @@ app.post('/api/production/start', async (req, res) => {
   }
 });
 
-// Cancelar produção
 app.post('/api/production/cancel', async (req, res) => {
   try {
     if (!fluxo.opcua.isConnected()) {
@@ -204,7 +181,7 @@ app.post('/api/production/cancel', async (req, res) => {
     }
 
     await fluxo.opcua.cancelarProducao();
-    fluxo.setState(30); // Estado de falha/cancelamento
+    fluxo.setState(30);
     
     res.json({ 
       success: true, 
@@ -216,7 +193,6 @@ app.post('/api/production/cancel', async (req, res) => {
   }
 });
 
-// Resetar CLP
 app.post('/api/production/reset', async (req, res) => {
   try {
     if (!fluxo.opcua.isConnected()) {
@@ -227,7 +203,7 @@ app.post('/api/production/reset', async (req, res) => {
     }
 
     await fluxo.opcua.resetPLC();
-    fluxo.setState(0); // Volta ao estado inicial
+    fluxo.setState(0);
     
     res.json({ 
       success: true, 
@@ -239,7 +215,6 @@ app.post('/api/production/reset', async (req, res) => {
   }
 });
 
-// Status da produção
 app.get('/api/production/status', async (req, res) => {
   try {
     const connected = fluxo.opcua.isConnected();
@@ -248,7 +223,6 @@ app.get('/api/production/status', async (req, res) => {
     let estoqueProd = null;
     
     if (connected) {
-      // Consulta estoqueProd do CLP
       estoqueProd = await fluxo.consultarEstoqueProd();
       
       if (fluxo.pedido) {
@@ -278,7 +252,6 @@ app.get('/api/production/status', async (req, res) => {
   }
 });
 
-// Consultar todos os estoques (produção e produtos)
 app.get('/api/stock', async (req, res) => {
   try {
     if (!fluxo.opcua.isConnected()) {
@@ -288,10 +261,8 @@ app.get('/api/stock', async (req, res) => {
       });
     }
 
-    // Consulta estoque de produção (matéria-prima)
     const estoqueProd = await fluxo.consultarEstoqueProd();
 
-    // Consulta estoques individuais dos produtos
     const estoquesProdutos = await fluxo.consultarTodosEstoquesProdutos();
 
     if (estoqueProd === null || !estoquesProdutos) {
@@ -339,7 +310,6 @@ app.get('/api/stock', async (req, res) => {
   }
 });
 
-// Consultar estoque de um produto específico
 app.get('/api/stock/:productId', async (req, res) => {
   try {
     const productId = parseInt(req.params.productId);
@@ -351,7 +321,6 @@ app.get('/api/stock/:productId', async (req, res) => {
       });
     }
 
-    // Valida ID do produto
     if (![0, 1, 2].includes(productId)) {
       return res.status(400).json({
         success: false,
@@ -393,7 +362,6 @@ app.get('/api/stock/:productId', async (req, res) => {
   }
 });
 
-// Health check atualizado
 app.get("/health", async (req, res) => {
   let estoqueProd = null;
   let estoquesProdutos = null;
@@ -428,13 +396,7 @@ app.get("/health", async (req, res) => {
   });
 });
 
-/* =========================================================
-   FUNÇÕES AUXILIARES
-========================================================= */
-
-// Mapeia nome do produto para código do CLP
 function mapProductToCode(productName) {
-  // Mapeamento baseado nos produtos do frontend
   const productMap = {
     'Suco de Laranja': 0,
     'Suco de Morango': 1,
@@ -444,15 +406,14 @@ function mapProductToCode(productName) {
   const code = productMap[productName];
   
   if (code === undefined) {
-    console.warn(`⚠️ Produto não mapeado: ${productName}. Usando código padrão 0.`);
+    console.warn(`Produto não mapeado: ${productName}. Usando código padrão 0.`);
     return 0;
   }
   
-  console.log(`✅ Produto "${productName}" mapeado para código ${code}`);
+  console.log(`Produto "${productName}" mapeado para código ${code}`);
   return code;
 }
 
-// Descrição dos estados da máquina
 function getStateDescription(state) {
   const states = {
     0: 'Aguardando pedido',
@@ -468,57 +429,48 @@ function getStateDescription(state) {
   return states[state] || 'Estado desconhecido';
 }
 
-/* =========================================================
-   INICIALIZAÇÃO DO SERVIDOR
-========================================================= */
 async function startServer() {
   try {
-    // Conectar ao OPC UA tradicional (opcuaService)
-    console.log("🔌 Tentando conectar ao OPC UA (opcuaService)...");
+    console.log("Tentando conectar ao OPC UA (opcuaService)...");
     const connected = await opcuaService.connect();
     if (connected) {
-      console.log("✅ OpcuaService conectado ao OPC UA!");
+      console.log("OpcuaService conectado ao OPC UA!");
     } else {
-      console.log("⚠️ OpcuaService não conectou ao OPC UA.");
+      console.log("OpcuaService não conectou ao OPC UA.");
     }
 
-    // Conectar ao FluxoProducao
-    console.log("🔌 Inicializando FluxoProducao...");
+    console.log("Inicializando FluxoProducao...");
     await fluxo.connect();
     if (fluxo.opcua.isConnected()) {
-      console.log("✅ FluxoProducao conectado ao CLP via OPC UA!");
+      console.log("FluxoProducao conectado ao CLP via OPC UA!");
       
-      // Inicia o loop da máquina de estados
       setInterval(async () => {
         try {
           await fluxo.step();
         } catch (err) {
-          console.error('❌ Erro no step do fluxo:', err);
+          console.error('Erro no step do fluxo:', err);
         }
-      }, 1000); // Executa step() a cada 1 segundo
+      }, 1000);
       
-      console.log("🔄 Loop da máquina de estados iniciado (1s)");
+      console.log("Loop da máquina de estados iniciado (1s)");
     } else {
-      console.log("⚠️ FluxoProducao não conectou ao CLP.");
+      console.log("FluxoProducao não conectou ao CLP.");
     }
 
   } catch (err) {
-    console.error("❌ Erro ao conectar OPC UA:", err.message);
+    console.error("Erro ao conectar OPC UA:", err.message);
   }
 
   app.listen(PORT, () => {
-    console.log('\n🌐 ═══════════════════════════════════════');
+    console.log('\n═══════════════════════════════════════');
     console.log(`   SERVIDOR RODANDO`);
     console.log(`   http://localhost:${PORT}`);
     console.log('═══════════════════════════════════════\n');
   });
 }
 
-/* =========================================================
-   GRACEFUL SHUTDOWN
-========================================================= */
 process.on('SIGINT', async () => {
-  console.log('\n🛑 Encerrando servidor...');
+  console.log('\nEncerrando servidor...');
   await fluxo.disconnect();
   await opcuaService.disconnect();
   await mongoose.connection.close();
@@ -526,7 +478,7 @@ process.on('SIGINT', async () => {
 });
 
 process.on('SIGTERM', async () => {
-  console.log('\n🛑 Encerrando servidor...');
+  console.log('\nEncerrando servidor...');
   await fluxo.disconnect();
   await opcuaService.disconnect();
   await mongoose.connection.close();

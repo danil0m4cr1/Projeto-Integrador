@@ -17,7 +17,6 @@ export default {
     mesFalt: node("status", "mesFalt"),
     mesPcsBoas: node("status", "mesPcsBoas"),
     mesPcsRuins: node("status", "mesPcsRuins"),
-    // Campos de data/hora
     mesTempInicioYear: node("status", "mesTempInicio", "YEAR"),
     mesTempInicioMonth: node("status", "mesTempInicio", "MONTH"),
     mesTempInicioDay: node("status", "mesTempInicio", "DAY"),

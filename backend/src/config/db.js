@@ -3,13 +3,13 @@ import { config } from "dotenv";
 
 config();
 
-export async function connectDB() { // Função para conectar-se ao BD
-  const uri = process.env.MONGODB_URI; // Puxa a string do BD no .env
-  if (!uri) { // Se não existir, não se conecta
+export async function connectDB() {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
     console.error("MONGODB_URI não definida no .env");
     process.exit(1);
   }
-  try { // Se existir, se conecta
+  try {
     mongoose.set("strictQuery", true);
     await mongoose.connect(uri, { dbName: "users" });
     console.log("Conectado ao MongoDB:", uri);

@@ -1,10 +1,8 @@
 <template>
   <section class="h-[calc(100vh-92px)] w-full flex flex-col items-center pb-20 bg-[#FFFBF0] max-[1300px]:h-full max-[1300px]:mt-10">
-    <!-- Estoque de Produtos -->
     <div class="w-full max-w-5xl mt-12 text-center">
       <h2 class="text-2xl font-bold mb-4">Estoque de produtos</h2>
 
-      <!-- Campo de busca -->
       <div class="flex justify-center mb-6">
         <input
           v-model="search"
@@ -14,7 +12,6 @@
         />
       </div>
 
-      <!-- Tabela de produtos -->
       <table class="w-full border-collapse border border-black mb-8">
         <thead>
           <tr class="bg-[#EFB11E] text-white text-left border border-black">
@@ -41,7 +38,6 @@
         </tbody>
       </table>
 
-      <!-- Botões -->
       <div class="flex justify-center gap-6 mb-16">
         <button class="bg-[#EFB11E] text-white px-8 py-2 rounded-full font-semibold hover:opacity-90 transition">
           GERAR RELATÓRIO
@@ -51,7 +47,6 @@
         </button>
       </div>
 
-      <!-- Status de Produção -->
       <h2 class="text-2xl font-bold mb-4">Status de produção</h2>
 
       <table class="w-full border-collapse border border-black">

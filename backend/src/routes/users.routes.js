@@ -3,7 +3,6 @@ import User from "../models/User.js";
 
 const router = Router();
 
-// Verificar usuário (login)
 router.post("/check-user", async (req, res) => {
   const { email, pass } = req.body;
 
@@ -30,10 +29,9 @@ router.post("/check-user", async (req, res) => {
   }
 });
 
-// Listar todos os usuários
 router.get("/", async (req, res) => {
   try {
-    const users = await User.find({}, { pass: 0 }); // Não retorna a senha
+    const users = await User.find({}, { pass: 0 });
     res.json(users);
   } catch (error) {
     console.error("Erro ao buscar usuários:", error);
@@ -41,7 +39,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Atualizar usuário
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { name, email, role } = req.body;
@@ -64,7 +61,6 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// Deletar usuário
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
 

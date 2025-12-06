@@ -14,7 +14,6 @@
         <h2 class="text-[37px] font-bold text-[#EFB11E]">Meu Carrinho</h2>
       </div>
 
-      <!-- Produtos do Carrinho -->
       <div class="flex w-[100%] gap-15 max-[1120px]:flex-col justify-center items-center">
         <div 
           v-for="(product, index) in cartProducts" 
@@ -52,7 +51,6 @@
         </div>
       </div>
 
-      <!-- Mensagem quando carrinho vazio -->
       <div v-if="cartProducts.length === 0" class="flex flex-col items-center text-center py-20">
         <i class="fa-solid fa-cart-shopping text-[64px] text-gray-300 mb-4"></i>
         <p class="text-[24px] text-gray-500 mb-2">Seu carrinho está vazio</p>
@@ -62,7 +60,6 @@
         </router-link>
       </div>
 
-      <!-- Total Geral -->
       <div v-if="cartProducts.length > 0" class="flex justify-center items-center gap-2 mt-4 text-[24px] font-bold">
         Total Geral: <span class="text-[#EFB11E]">R$ {{ totalGeral }}</span>
       </div>
@@ -126,7 +123,6 @@ const decrementQuantity = (index) => {
 };
 
 const finalizarCompra = async () => {
-  // Verifica se o usuário está logado
   if (!userStore.isLoggedIn || !userStore.user?.email) {
     alert('Você precisa estar logado para finalizar a compra!');
     router.push('/login');
@@ -148,9 +144,8 @@ const finalizarCompra = async () => {
       totalAmount: totalGeral.value
     };
 
-    console.log('📦 Enviando pedido para o backend:', orderData);
+    console.log('Enviando pedido para o backend:', orderData);
 
-    // ENDPOINT ATUALIZADO - Envia para o CLP via FluxoProducao
     const response = await fetch('http://localhost:3000/api/orders/create-and-send', {
       method: 'POST',
       headers: {
@@ -166,19 +161,18 @@ const finalizarCompra = async () => {
 
     const result = await response.json();
     
-    console.log('✅ Resposta do servidor:', result);
+    console.log('Resposta do servidor:', result);
     
-    // Mensagem de sucesso detalhada
     alert(`Compra finalizada com sucesso!
     
-🎉 Pedido #${result.data.orderId} registrado
-📦 Enviado para produção no CLP
-⚙️ Status: ${result.data.status}`);
+Pedido #${result.data.orderId} registrado
+Enviado para produção no CLP
+Status: ${result.data.status}`);
     
     productStore.clearCart();
     router.push('/');
   } catch (error) {
-    console.error('❌ Erro ao finalizar compra:', error);
+    console.error('Erro ao finalizar compra:', error);
     alert(`Erro ao finalizar compra: ${error.message}\n\nTente novamente.`);
   } finally {
     isProcessing.value = false;

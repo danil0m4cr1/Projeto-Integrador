@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const UserSchema = new mongoose.Schema( // Define o template de objeto que deve ser retornado ao BD
+const UserSchema = new mongoose.Schema( 
   {
     name: { type: String, required: false, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },

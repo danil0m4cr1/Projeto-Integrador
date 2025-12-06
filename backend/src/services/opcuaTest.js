@@ -17,36 +17,32 @@ async function main() {
   });
 
   await server.initialize();
-  console.log("✅ Servidor OPC UA inicializado");
+  console.log("Servidor OPC UA inicializado");
 
   const addressSpace = server.engine.addressSpace;
   const namespace = addressSpace.getOwnNamespace();
 
-  // ============ ESTADO DA PRODUÇÃO ============
-  let estadoGeral = 0; // 0=disponível 1=produzindoEstoque 2=produzindoOp 3=finalizadoOp 4=reprovado 5=falha
+  let estadoGeral = 0;
   let falhaAtiva = false;
   let codigoFalha = 0;
   let contadorBilhoes = 0;
   let opAtual = 0;
-  let estoqueProdutos = [0, 0, 0]; // [Limão, Morango, Laranja]
+  let estoqueProdutos = [0, 0, 0];
   let quantidadeProduzida = 0;
   let pecasBoas = 0;
   let pecasRuins = 0;
   let tempoInicioMs = 0;
   let tempoFimMs = 0;
 
-  // Dados do pedido atual
   let pedidoOp = 0;
   let pedidoProduto = 0;
   let pedidoQuantidade = 0;
 
-  // Flags de comando
   let comandoNovoPedido = false;
   let comandoInicio = false;
   let comandoAbortar = false;
   let comandoReset = false;
 
-  // ACKs
   let ackPedido = false;
   let ackAplica = false;
   let ackInicio = false;
@@ -57,13 +53,11 @@ async function main() {
   let productionInterval = null;
   let isProducing = false;
 
-  // ============ CRIAR PASTAS ============
   const statusFolder = namespace.addFolder("ObjectsFolder", { browseName: "status" });
   const pedidoFolder = namespace.addFolder("ObjectsFolder", { browseName: "pedido" });
   const cmdFolder = namespace.addFolder("ObjectsFolder", { browseName: "cmd" });
   const ackFolder = namespace.addFolder("ObjectsFolder", { browseName: "ack" });
 
-  // ============ VARIÁVEIS DE STATUS ============
   const createStatusVar = (folder, name, dataType, getValue, setValue) => {
     const variable = namespace.addVariable({
       componentOf: folder,
@@ -82,7 +76,6 @@ async function main() {
     return variable;
   };
 
-  // Status
   createStatusVar(statusFolder, "geral", DataType.Int32, () => estadoGeral);
   createStatusVar(statusFolder, "falhaAtiva", DataType.Boolean, () => falhaAtiva);
   createStatusVar(statusFolder, "falhaAtivaCod", DataType.Int32, () => codigoFalha);
@@ -120,18 +113,15 @@ async function main() {
   createStatusVar(statusFolder, "mesPcsBoas", DataType.Int32, () => pecasBoas);
   createStatusVar(statusFolder, "mesPcsRuins", DataType.Int32, () => pecasRuins);
 
-  // Pedido
   createStatusVar(pedidoFolder, "op", DataType.Int32, () => pedidoOp, (v) => { pedidoOp = v; });
   createStatusVar(pedidoFolder, "produto", DataType.Int32, () => pedidoProduto, (v) => { pedidoProduto = v; });
   createStatusVar(pedidoFolder, "quant", DataType.Int32, () => pedidoQuantidade, (v) => { pedidoQuantidade = v; });
 
-  // Comandos
   const novoPedVar = createStatusVar(cmdFolder, "novoPed", DataType.Boolean, () => comandoNovoPedido, (v) => { comandoNovoPedido = v; });
   const inicioVar = createStatusVar(cmdFolder, "inicio", DataType.Boolean, () => comandoInicio, (v) => { comandoInicio = v; });
   const abortarVar = createStatusVar(cmdFolder, "abortar", DataType.Boolean, () => comandoAbortar, (v) => { comandoAbortar = v; });
   const resetVar = createStatusVar(cmdFolder, "reset", DataType.Boolean, () => comandoReset, (v) => { comandoReset = v; });
 
-  // ACKs
   createStatusVar(ackFolder, "pedidoAck", DataType.Boolean, () => ackPedido);
   createStatusVar(ackFolder, "aplicaAck", DataType.Boolean, () => ackAplica);
   createStatusVar(ackFolder, "inicioAck", DataType.Boolean, () => ackInicio);
@@ -139,22 +129,20 @@ async function main() {
   createStatusVar(ackFolder, "fimAck", DataType.Boolean, () => ackFim);
   createStatusVar(ackFolder, "falhaAck", DataType.Boolean, () => ackFalha);
 
-  // ============ LÓGICA DE PRODUÇÃO ============
-  
   function startProduction() {
     if (isProducing) {
-      console.log("⚠️ Produção já em andamento");
+      console.log("Produção já em andamento");
       return;
     }
 
-    console.log(`\n🏭 INICIANDO PRODUÇÃO`);
+    console.log(`\nINICIANDO PRODUÇÃO`);
     console.log(`   OP: ${pedidoOp}`);
     console.log(`   Produto: ${pedidoProduto} (0=Limão, 1=Morango, 2=Laranja)`);
     console.log(`   Quantidade: ${pedidoQuantidade}`);
 
     isProducing = true;
     opAtual = pedidoOp;
-    estadoGeral = 2; // produzindoOp
+    estadoGeral = 2;
     quantidadeProduzida = 0;
     pecasBoas = 0;
     pecasRuins = 0;
@@ -168,20 +156,16 @@ async function main() {
     const productNames = ['Limão', 'Morango', 'Laranja'];
     console.log(`   Produzindo: ${productNames[pedidoProduto]}\n`);
 
-    // Simular produção (cada peça leva ~3 segundos)
     productionInterval = setInterval(() => {
       if (!isProducing || comandoAbortar) {
         stopProduction(comandoAbortar);
         return;
       }
 
-      // Incrementar contador global
       contadorBilhoes = (contadorBilhoes + 1) % 4000000000;
 
-      // Produzir peça
       quantidadeProduzida++;
       
-      // 90% de chance de peça boa
       if (Math.random() > 0.1) {
         pecasBoas++;
       } else {
@@ -189,29 +173,27 @@ async function main() {
       }
 
       const progress = Math.round((quantidadeProduzida / pedidoQuantidade) * 100);
-      console.log(`📊 Produzindo... ${quantidadeProduzida}/${pedidoQuantidade} (${progress}%) - Boas: ${pecasBoas} | Ruins: ${pecasRuins}`);
+      console.log(`Produzindo... ${quantidadeProduzida}/${pedidoQuantidade} (${progress}%) - Boas: ${pecasBoas} | Ruins: ${pecasRuins}`);
 
       ackExec = true;
 
-      // Verificar se concluiu
       if (quantidadeProduzida >= pedidoQuantidade) {
         completeProduction();
       }
-    }, 3000); // 3 segundos por peça
+    }, 3000);
   }
 
   function completeProduction() {
-    console.log(`\n✅ PRODUÇÃO CONCLUÍDA!`);
+    console.log(`\nPRODUÇÃO CONCLUÍDA!`);
     console.log(`   OP: ${opAtual}`);
     console.log(`   Total produzido: ${quantidadeProduzida}`);
     console.log(`   Peças boas: ${pecasBoas}`);
     console.log(`   Peças ruins: ${pecasRuins}`);
     
     isProducing = false;
-    estadoGeral = 3; // finalizadoOp
+    estadoGeral = 3;
     tempoFimMs = Date.now();
     
-    // Adicionar ao estoque
     estoqueProdutos[pedidoProduto] += pecasBoas;
     
     ackFim = true;
@@ -219,26 +201,25 @@ async function main() {
     clearInterval(productionInterval);
     productionInterval = null;
 
-    // Resetar ACKs após 2 segundos
     setTimeout(() => {
       resetAcks();
-      estadoGeral = 0; // disponível
+      estadoGeral = 0;
       opAtual = 0;
     }, 2000);
   }
 
   function stopProduction(aborted = false) {
     if (!isProducing) {
-      console.log("⚠️ Nenhuma produção em andamento");
+      console.log("Nenhuma produção em andamento");
       return;
     }
 
-    console.log(`\n🛑 PRODUÇÃO ${aborted ? 'ABORTADA' : 'PARADA'}`);
+    console.log(`\nPRODUÇÃO ${aborted ? 'ABORTADA' : 'PARADA'}`);
     console.log(`   OP: ${opAtual}`);
     console.log(`   Produzido até o momento: ${quantidadeProduzida}/${pedidoQuantidade}`);
     
     isProducing = false;
-    estadoGeral = aborted ? 4 : 0; // reprovado ou disponível
+    estadoGeral = aborted ? 4 : 0;
     tempoFimMs = Date.now();
     
     if (aborted && pecasBoas > 0) {
@@ -264,11 +245,9 @@ async function main() {
     ackFalha = false;
   }
 
-  // ============ MONITORAR COMANDOS ============
-  
   novoPedVar.on("value_changed", (dataValue) => {
     if (dataValue.value.value === true && !comandoNovoPedido) {
-      console.log(`\n📝 NOVO PEDIDO RECEBIDO`);
+      console.log(`\nNOVO PEDIDO RECEBIDO`);
       console.log(`   OP: ${pedidoOp}`);
       console.log(`   Produto: ${pedidoProduto}`);
       console.log(`   Quantidade: ${pedidoQuantidade}`);
@@ -282,7 +261,7 @@ async function main() {
       if (pedidoOp > 0 && pedidoQuantidade > 0) {
         startProduction();
       } else {
-        console.log("⚠️ Dados do pedido incompletos, não é possível iniciar");
+        console.log("Dados do pedido incompletos, não é possível iniciar");
       }
     }
     comandoInicio = dataValue.value.value;
@@ -299,7 +278,7 @@ async function main() {
 
   resetVar.on("value_changed", (dataValue) => {
     if (dataValue.value.value === true && !comandoReset) {
-      console.log("\n🔄 RESET DO SISTEMA");
+      console.log("\nRESET DO SISTEMA");
       
       if (isProducing) {
         stopProduction(false);
@@ -316,21 +295,19 @@ async function main() {
       tempoFimMs = 0;
       resetAcks();
       
-      console.log("✅ Sistema resetado");
+      console.log("Sistema resetado");
     }
     comandoReset = dataValue.value.value;
   });
 
-  // ============ INICIAR SERVIDOR ============
-  
   await server.start();
 
   const endpointUrl = server.endpoints[0].endpointDescriptions()[0].endpointUrl;
   console.log("\n" + "=".repeat(70));
-  console.log("🎯 SERVIDOR OPC UA PLC SIMULATOR INICIADO!");
+  console.log("SERVIDOR OPC UA PLC SIMULATOR INICIADO!");
   console.log("=".repeat(70));
-  console.log(`\n📡 Endpoint: ${endpointUrl}`);
-  console.log(`\n📋 Estrutura de variáveis (conforme especificação do PLC):`);
+  console.log(`\nEndpoint: ${endpointUrl}`);
+  console.log(`\nEstrutura de variáveis (conforme especificação do PLC):`);
   console.log(`\n   STATUS (ns=2;s=status.*):`);
   console.log(`      geral, falhaAtiva, falhaAtivaCod, accSinc, opAtual`);
   console.log(`      estoqueProd[3], mesProd, mesFalt, mesTempoInicio, mesTempoFim`);
@@ -342,22 +319,21 @@ async function main() {
   console.log(`\n   ACKs (ns=2;s=ack.*):`);
   console.log(`      pedidoAck, aplicaAck, inicioAck, execAck, fimAck, falhaAck`);
   console.log("\n" + "=".repeat(70));
-  console.log("✅ Sistema disponível - Estado: 0 (disponível)");
-  console.log(`📦 Estoque: Limão=${estoqueProdutos[0]} | Morango=${estoqueProdutos[1]} | Laranja=${estoqueProdutos[2]}\n`);
+  console.log("Sistema disponível - Estado: 0 (disponível)");
+  console.log(`Estoque: Limão=${estoqueProdutos[0]} | Morango=${estoqueProdutos[1]} | Laranja=${estoqueProdutos[2]}\n`);
 
-  // Graceful shutdown
   process.on("SIGINT", async () => {
-    console.log("\n\n📛 Encerrando servidor...");
+    console.log("\n\nEncerrando servidor...");
     if (productionInterval) {
       clearInterval(productionInterval);
     }
     await server.shutdown();
-    console.log("✅ Servidor encerrado com sucesso");
+    console.log("Servidor encerrado com sucesso");
     process.exit(0);
   });
 }
 
 main().catch(err => {
-  console.error("❌ Erro ao iniciar servidor:", err);
+  console.error("Erro ao iniciar servidor:", err);
   process.exit(1);
 });

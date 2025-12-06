@@ -1,12 +1,10 @@
 <template>
   <section class="min-h-[calc(100vh-92px)] w-full flex flex-col justify-center items-center py-10 px-4 bg-[#FFFBF0]">
     <div class="w-full max-w-6xl flex flex-col justify-center flex-1">
-      <!-- Título -->
       <h1 class="text-3xl md:text-4xl font-bold text-center mb-8 text-black">
         {{ isAdmin ? 'Gerenciar Pedidos' : 'Meus Pedidos' }}
       </h1>
       
-      <!-- Barra de Pesquisa -->
       <div class="flex justify-center mb-6">
         <div class="relative w-full max-w-md">
           <input 
@@ -26,12 +24,10 @@
         </div>
       </div>
 
-      <!-- Loading -->
       <div v-if="loading" class="text-center py-10">
         <p class="text-xl text-gray-600">Carregando pedidos...</p>
       </div>
 
-      <!-- Tabela de Pedidos - Desktop -->
       <div class="hidden md:block overflow-x-auto">
         <table class="w-full border-collapse shadow-md rounded-lg overflow-hidden">
           <thead>
@@ -105,7 +101,6 @@
         </table>
       </div>
 
-      <!-- Cards - Mobile -->
       <div class="md:hidden space-y-4">
         <div 
           v-for="pedido in filteredPedidos" 
@@ -184,7 +179,6 @@
         </div>
       </div>
 
-      <!-- Mensagem quando não há pedidos -->
       <div v-if="filteredPedidos.length === 0 && !loading" class="text-center py-10">
         <i v-if="!isAdmin" class="fa-solid fa-box-open text-[64px] text-gray-300 mb-4"></i>
         <p class="text-gray-600 text-lg mb-2">
@@ -196,7 +190,6 @@
         </router-link>
       </div>
 
-      <!-- Botões de Ação (apenas para admin) -->
       <div v-if="isAdmin" class="mt-8 flex justify-center gap-4">
         <button
           v-if="!editMode"
@@ -221,7 +214,6 @@
         </template>
       </div>
 
-      <!-- Mensagens -->
       <div v-if="message" class="mt-4 px-4 py-2 rounded text-center" :class="messageType === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
         {{ message }}
       </div>
@@ -285,10 +277,8 @@ const fetchPedidos = async () => {
   try {
     let url;
     if (isAdmin.value) {
-      // Admin busca todos os pedidos
       url = 'http://localhost:3000/api/orders';
     } else {
-      // Usuário comum busca apenas seus pedidos
       const userEmail = user.value?.email;
       if (!userEmail) {
         throw new Error('Usuário não está logado');
@@ -380,7 +370,6 @@ select {
   cursor: pointer;
 }
 
-/* Scrollbar customizada */
 .overflow-y-auto::-webkit-scrollbar {
   width: 4px;
 }

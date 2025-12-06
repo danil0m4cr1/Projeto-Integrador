@@ -2,10 +2,8 @@
   <section
     class="h-[calc(100vh-92px)] w-full flex flex-col items-center justify-start pb-20 pt-12 bg-[#FFFBF0]"
   >
-    <!-- Título -->
     <h2 class="text-black text-xl font-bold mb-6">Gerenciar usuários</h2>
 
-    <!-- Barra de pesquisa -->
     <div class="mb-6 w-full max-w-xs">
       <input
         type="text"
@@ -15,10 +13,8 @@
       />
     </div>
 
-    <!-- Loading -->
     <div v-if="loading" class="text-black">Carregando usuários...</div>
 
-    <!-- ======== Versão Desktop ======== -->
     <div class="hidden md:block w-full max-w-3xl">
       <table class="w-full text-left border-collapse shadow-md rounded-lg overflow-hidden">
         <thead>
@@ -76,7 +72,6 @@
       </table>
     </div>
 
-    <!-- ======== Versão Mobile ======== -->
     <div
       class="block md:hidden w-full max-w-5xl overflow-x-auto"
     >
@@ -139,7 +134,6 @@
       </div>
     </div>
 
-    <!-- Botões -->
     <div class="mt-6 flex gap-4">
       <button
         v-if="!editMode"
@@ -164,7 +158,6 @@
       </template>
     </div>
 
-    <!-- Mensagens -->
     <div v-if="message" class="mt-4 px-4 py-2 rounded" :class="messageType === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
       {{ message }}
     </div>

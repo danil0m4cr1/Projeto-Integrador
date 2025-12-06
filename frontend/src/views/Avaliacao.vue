@@ -1,10 +1,8 @@
 <template>
   <div class="h-[calc(100vh-92px)] w-full flex flex-col justify-center items-center max-md:h-[calc(100vh-162px)]">
     
-    <!-- Título centralizado -->
     <h1 class="text-xl font-semibold mb-8 text-center">Avaliar Produtos</h1>
 
-    <!-- Caixa de avaliação -->
     <div class="bg-[#EFB11E] w-[550px] h-[300px] rounded-sm shadow p-8 text-center flex flex-col items-center justify-between max-md:w-[90%]">
       <div>
         <h2 class="text-lg font-bold">ITEM SELECIONADO:</h2>
@@ -25,7 +23,6 @@
         </div>
       </div>
 
-      <!-- Botão Confirmar -->
       <button
         class="bg-white text-black font-semibold py-2 px-8 rounded-md shadow transition-colors duration-200 cursor-pointer hover:bg-gray-200"
         @click="confirmarAvaliacao"

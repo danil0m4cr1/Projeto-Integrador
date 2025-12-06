@@ -15,5 +15,5 @@ export const useUserStore = defineStore('user', {
       this.isLoggedIn = false;
     }
   },
-  persist: true // Ativa a persistência automática com o plugin
+  persist: true
 });

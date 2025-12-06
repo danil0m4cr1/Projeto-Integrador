@@ -34,7 +34,7 @@ export const useProductStore = defineStore('product', {
     },
     
     addToCart(product) {
-      console.log('=== INÍCIO addToCart ===');
+      console.log('INÍCIO addToCart');
       console.log('Produto recebido:', product);
       console.log('Carrinho ANTES:', [...this.cart]);
       
@@ -43,17 +43,14 @@ export const useProductStore = defineStore('product', {
         return;
       }
       
-      // Verifica se o produto já está no carrinho
       const existingProductIndex = this.cart.findIndex(item => item.name === product.name);
       console.log('Índice do produto existente:', existingProductIndex);
       
       if (existingProductIndex !== -1) {
-        // Se já existe, aumenta a quantidade
         console.log('Produto já existe, aumentando quantidade');
         this.cart[existingProductIndex].quantity++;
         console.log('Nova quantidade:', this.cart[existingProductIndex].quantity);
       } else {
-        // Se não existe, adiciona com quantidade 1
         console.log('Adicionando NOVO produto ao carrinho');
         const newProduct = {
           name: product.name,
@@ -68,7 +65,7 @@ export const useProductStore = defineStore('product', {
       
       console.log('Carrinho DEPOIS:', [...this.cart]);
       console.log('Tamanho do carrinho:', this.cart.length);
-      console.log('=== FIM addToCart ===');
+      console.log('FIM addToCart');
     },
     
     removeFromCart(index) {
@@ -92,15 +89,4 @@ export const useProductStore = defineStore('product', {
       console.log('Carrinho limpo:', this.cart);
     }
   },
-  
-  // // Adiciona persistência com localStorage (opcional)
-  // persist: {
-  //   enabled: false, // Desabilitado por enquanto para debug
-  //   strategies: [
-  //     {
-  //       key: 'product-store',
-  //       storage: localStorage,
-  //     },
-  //   ],
-  // },
 });
